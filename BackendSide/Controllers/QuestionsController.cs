@@ -1,10 +1,16 @@
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 
 namespace BackendSide.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class QuestionsController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
@@ -18,16 +24,15 @@ namespace BackendSide.Controllers
             _logger = logger;
         }
 
-        [HttpGet(Name = "GetWeatherForecast")]
-        public IEnumerable<WeatherForecast> Get()
+        [HttpGet(Name = "GetQuestions")]
+        public IEnumerable<Question>? Get()
         {
-            return Enumerable.Range(1, 5).Select(index => new WeatherForecast
+            using (StreamReader r = new("questions.json"))
             {
-                Date = DateTime.Now.AddDays(index),
-                TemperatureC = Random.Shared.Next(-20, 55),
-                Summary = Summaries[Random.Shared.Next(Summaries.Length)]
-            })
-            .ToArray();
+                string json = r.ReadToEnd();
+                List<Question>? questions = JsonConvert.DeserializeObject<List<Question>>(json);
+                return questions?.ToArray();
+            }
         }
     }
 }
